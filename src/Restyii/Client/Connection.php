@@ -9,7 +9,7 @@ use Guzzle\Http\Exception\BadResponseException;
 use Guzzle\Http\Exception\ClientErrorResponseException;
 use Restyii\Client\Schema\Schema;
 
-class Connection extends \CApplicationComponent
+class Connection // extends \CApplicationComponent
 {
     /**
      * @var array the default headers to send
@@ -140,21 +140,22 @@ class Connection extends \CApplicationComponent
      */
     public function request($verb, $url, $data = null, $headers = null)
     {
-        if ($headers !== null)
-            $headers = \CMap::mergeArray($this->defaultHeaders, $headers);
-        else
+        if ($headers !== null) {
+            $headers = array_merge($this->defaultHeaders, $headers);
+        } else {
             $headers = $this->defaultHeaders;
+        }
 
         $request = $this->createRequest($verb, $url, $data, $headers);
 
-        if($this->hasEventHandler('onBeforeRequest')) {
-            $event = new RequestEvent;
-            $event->request = $request;
-            $event->sender = $this;
-            $this->onBeforeRequest($event);
-            if(!$event->isValid)
-                return $event->response;
-        }
+//        if($this->hasEventHandler('onBeforeRequest')) {
+//            $event = new RequestEvent;
+//            $event->request = $request;
+//            $event->sender = $this;
+//            $this->onBeforeRequest($event);
+//            if(!$event->isValid)
+//                return $event->response;
+//        }
 
         try {
             $result = $request->send();
@@ -168,7 +169,6 @@ class Connection extends \CApplicationComponent
         }
         catch (BadResponseException $e) {
             $result = $e->getResponse()->getBody(true);
-            \Yii::log('Restyii Error: '.$result, 'error', 'restyii.client.connection');
             throw $e;
         }
         return $decoded;
